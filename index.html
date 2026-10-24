@@ -10,44 +10,32 @@
 <h2>🚀 My Trading App</h2>
 <div style="background:#1a1d26;padding:20px;border-radius:16px;margin-top:20px">
 <h3>Deposit to Trade</h3>
-<input id="email" type="email" placeholder="Your email" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#0f1115;color:#fff;margin:8px 0">
+<input id="email" type="email" placeholder="Your email" value="astriodkeys@gmail.com" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#0f1115;color:#fff;margin:8px 0">
 <input id="amount" type="number" placeholder="Amount NGN" value="1000" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#0f1115;color:#fff;margin:8px 0">
 <button onclick="payWithPaystack()" style="background:#00cc66;color:#fff;border:none;padding:14px;border-radius:10px;width:100%;font-size:16px;font-weight:600">Deposit Now</button>
 <div id="status" style="margin-top:15px"></div>
 </div>
-
 <script>
-// 🔑 YOUR LIVE PUBLIC KEY GOES HERE - pk_live_... 
-const PAYSTACK_KEY = 'pk_live_8eef9c6a227339fbc3dc6af0d48be15e0e5960bc’;
-
+const PAYSTACK_KEY = 'pk_live_8eef9c6a227339fbc3dc6af0d48be15e0e5960bc';
 function payWithPaystack(){
   const email = document.getElementById('email').value;
   const amount = document.getElementById('amount').value;
   const statusEl = document.getElementById('status');
-  
-  // Use saved key if you entered in app
-  let keyToUse = localStorage.getItem('my_paystack_pk_live') || PAYSTACK_KEY;
-  
-  if(keyToUse.includes('REPLACE') || keyToUse.includes('xxxx')){
-     let userKey = prompt('Setup: Paste your LIVE PUBLIC Key (pk_live_...):');
-     if(userKey && userKey.startsWith('pk_live_')){
-       localStorage.setItem('my_paystack_pk_live', userKey.trim());
-       keyToUse = userKey.trim();
-     } else {
-       statusEl.innerHTML = '⚠️ Invalid key. Must start with pk_live_';
-       return;
-     }
+  if(!email || !amount){
+    statusEl.innerHTML = '❌ Enter email and amount';
+    return;
   }
-
   let handler = PaystackPop.setup({
-    key: keyToUse,
+    key: PAYSTACK_KEY,
     email: email,
     amount: amount * 100,
     currency: 'NGN',
     callback: function(response){
-      statusEl.innerHTML = '✅ Success! Ref: ' + response.reference + '<br>Money goes to YOUR balance.';
+      statusEl.innerHTML = '✅ Success! Ref: ' + response.reference + '<br>Payment received!';
     },
-    onClose: function(){ statusEl.innerHTML = 'Closed'; }
+    onClose: function(){
+      statusEl.innerHTML = 'Payment closed';
+    }
   });
   handler.openIframe();
 }
