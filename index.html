@@ -1,152 +1,141 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>XTRADEX - X Trades</title>
 <script src="https://js.paystack.co/v1/inline.js"></script>
+<script src="https://s3.tradingview.com/tv.js"></script>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
-body{background:#080c18;color:#fff;font-family:system-ui;padding-bottom:90px;-webkit-text-size-adjust:100%}
+*{margin:0;padding:0;box-sizing:border-box;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+body{background:#080c18;color:#fff;font-family:system-ui;padding-bottom:95px;-webkit-text-size-adjust:100%}
 input,select,button{font-size:16px!important}
-.top{padding:18px 15px 5px;text-align:center}
-.top h1{font-size:22px;letter-spacing:2px}
-.top small{letter-spacing:4px;color:#5a6a8a;font-size:10px}
-.tabs{display:flex;background:#121a2e;margin:12px 15px;padding:5px;border-radius:30px}
-.tabs button{flex:1;padding:10px;border:none;border-radius:20px;font-weight:700}
-.tabs .active{background:#2a7bff;color:#fff}
-.tabs .off{background:transparent;color:#5a6a8a}
-.timer{margin:0 15px;background:#121e38;padding:10px;border-radius:10px;text-align:center;font-size:12px;color:#8aa0c8}
-.cards{display:flex;gap:10px;padding:12px 15px}
-.card{flex:1;background:#121a2e;border-radius:14px;padding:12px;border:1px solid #1e2a4a}
-.card .t{font-size:10px;color:#5a6a8a;letter-spacing:1px}
-.card .v{font-size:18px;font-weight:700;margin:6px 0}
-.card .s{font-size:10px;color:#5a6a8a}
-.chartBox{margin:0 15px;background:#121a2e;border-radius:16px;padding:12px;border:1px solid #1e2a4a}
-.price{font-size:28px;font-weight:800}
-.change{font-size:12px;color:#00cc88}
-canvas{width:100%;height:180px;margin-top:10px;background:#0a1020;border-radius:8px}
-.tf{display:flex;gap:6px;margin-top:8px}
-.tf button{flex:1;padding:8px;border:none;border-radius:20px;background:#1a2440;color:#5a6a8a;font-size:12px}
-.tf .on{background:#2a7bff;color:#fff}
-.actions{display:flex;gap:10px;margin:12px 15px}
-.buy{flex:1;background:#00cc66;border:none;padding:16px;border-radius:12px;color:#fff;font-weight:800;letter-spacing:2px}
-.sell{flex:1;background:#ff3b5c;border:none;padding:16px;border-radius:12px;color:#fff;font-weight:800;letter-spacing:2px}
-.deposit{margin:12px 15px;background:#121a2e;border-radius:16px;padding:15px;border:1px solid #1e2a4a}
-.deposit h3{font-size:15px;margin-bottom:10px}
-.payRow{display:flex;gap:10px;margin:8px 0}
-.payOpt{flex:1;background:#1a2440;padding:12px;border-radius:12px;display:flex;align-items:center;gap:10px}
-.payOpt b{font-size:13px}
-.payOpt span{font-size:10px;color:#5a6a8a;display:block}
-.deposit input{width:100%;padding:13px;border-radius:10px;border:1px solid #2a3a5a;background:#0a1020;color:#fff;margin:6px 0}
-.deposit .mainBtn{width:100%;padding:14px;border-radius:10px;border:none;background:#00cc66;color:#fff;font-weight:700;margin-top:8px}
-.bottom{position:fixed;bottom:0;left:0;right:0;background:#0d1220;border-top:1px solid #1e2a4a;display:flex;padding:10px 0}
-.bottom button{flex:1;background:none;border:none;color:#5a6a8a;font-size:10px}
-.bottom .active{color:#2a7bff}
-.panel{display:none;padding:15px}
-.setRow{display:flex;justify-content:space-between;align-items:center;background:#121a2e;padding:14px;border-radius:10px;margin:8px 0;border:1px solid #1e2a4a}
-.lockedBox{display:none;text-align:center;background:#1a1d26;padding:18px;border-radius:12px;margin-top:10px}
+.top{text-align:center;padding:18px 0 8px}.top h1{letter-spacing:2px;font-size:22px}.top small{letter-spacing:4px;color:#5a6a8a;font-size:10px}
+.tabs{display:flex;background:#121a2e;margin:0 15px;padding:5px;border-radius:30px}.tabs button{flex:1;padding:10px;border:none;border-radius:20px;font-weight:700}.tabs .active{background:#2a7bff;color:#fff}.tabs .off{background:transparent;color:#5a6a8a}
+.timer{margin:8px 15px;background:#121e38;padding:9px;border-radius:10px;text-align:center;font-size:12px;color:#8aa0c8}
+.page{display:none}.page.active{display:block}
+.cards{display:flex;gap:10px;padding:12px 15px}.card{flex:1;background:#121a2e;border-radius:14px;padding:12px;border:1px solid #1e2a4a}.card .t{font-size:10px;color:#5a6a8a}.card .v{font-size:18px;font-weight:700;margin:6px 0}.card .s{font-size:10px;color:#5a6a8a}
+.chartWrap{margin:0 15px;background:#121a2e;border-radius:16px;padding:12px;border:1px solid #1e2a4a}
+.priceRow{display:flex;justify-content:space-between;align-items:center}.price{font-size:28px;font-weight:800;margin:4px 0}.change{font-size:12px;color:#00cc88}
+#tvChart{height:260px;margin-top:10px;border-radius:8px;overflow:hidden}
+.tf{display:flex;gap:6px;margin-top:8px}.tf button{flex:1;padding:8px;border:none;border-radius:20px;background:#1a2440;color:#5a6a8a;font-size:12px}.tf .on{background:#2a7bff;color:#fff}
+.actions{display:flex;gap:10px;margin:12px 15px}.buy{flex:1;background:#00cc66;border:none;padding:16px;border-radius:12px;color:#fff;font-weight:800;letter-spacing:2px}.sell{flex:1;background:#ff3b5c;border:none;padding:16px;border-radius:12px;color:#fff;font-weight:800;letter-spacing:2px}
+.box{margin:12px 15px;background:#121a2e;border-radius:16px;padding:15px;border:1px solid #1e2a4a}.box h3{font-size:15px;margin-bottom:10px}
+.box input{width:100%;padding:13px;border-radius:10px;border:1px solid #2a3a5a;background:#0a1020;color:#fff;margin:6px 0}
+.btn{width:100%;padding:14px;border-radius:10px;border:none;background:#00cc66;color:#fff;font-weight:700;margin-top:8px}.btnBlue{background:#2a7bff}
+.payOpt{flex:1;background:#1a2440;padding:12px;border-radius:12px;display:flex;align-items:center;gap:10px}.payRow{display:flex;gap:10px;margin:8px 0}.payOpt b{font-size:13px}.payOpt span{font-size:10px;color:#5a6a8a;display:block}
+.setRow{display:flex;justify-content:space-between;align-items:center;background:#0f1629;padding:14px;border-radius:10px;margin:8px 0;border:1px solid #1e2a4a}
+.bottom{position:fixed;bottom:0;left:0;right:0;background:#0d1220;border-top:1px solid #1e2a4a;display:flex;padding:8px 0;z-index:99}.bottom button{flex:1;background:none;border:none;color:#5a6a8a;font-size:11px}.bottom .active{color:#2a7bff}
+.tradeItem{background:#121a2e;padding:12px;border-radius:10px;margin:8px 0;border:1px solid #1e2a4a;display:flex;justify-content:space-between}
+.lockedArea{text-align:center;background:#1a1d26;padding:18px;border-radius:12px;margin-top:12px}
 </style>
 </head>
 <body>
 
-<div class="top">
-<h1>XTRADEX</h1>
-<small>X TRADES</small>
-</div>
-
+<div class="top"><h1>XTRADEX</h1><small>X TRADES</small></div>
 <div class="tabs">
 <button id="realBtn" class="active" onclick="setMode('REAL')">REAL</button>
 <button id="demoBtn" class="off" onclick="setMode('DEMO')">DEMO</button>
 </div>
+<div id="timer" class="timer">Loading...</div>
 
-<div id="timer" class="timer">Loading trial...</div>
-
-<div id="tradePage">
+<!-- TRADE -->
+<div id="tradePage" class="page active">
 <div class="cards">
-<div class="card">
-<div class="t">REAL WALLET</div>
-<div class="v" id="realBal">$0.00</div>
-<div class="s" id="realNote">Verification required to trade</div>
+<div class="card"><div class="t">REAL WALLET</div><div class="v" id="realBal">$0.00</div><div class="s" id="realNote">Admin access</div></div>
+<div class="card"><div class="t">DEMO WALLET</div><div class="v" style="color:#00cc88">$10,000.00</div><div class="s">Practice - unlimited</div></div>
 </div>
-<div class="card">
-<div class="t">DEMO WALLET</div>
-<div class="v" style="color:#00cc88">$10,000.00</div>
-<div class="s">Practice mode - unlimited demo funds</div>
-</div>
-</div>
-
-<div class="chartBox">
-<div style="display:flex;justify-content:space-between;align-items:center">
-<div>
-<div style="display:flex;align-items:center;gap:6px"><div style="width:28px;height:28px;background:#f7931a;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px">B</div><b>BTC/USD</b><span style="background:#1a2440;color:#f7931a;font-size:9px;padding:2px 6px;border-radius:10px">BTC</span></div>
-<div style="font-size:11px;color:#5a6a8a">Bitcoin - Spot</div>
-</div>
-<div style="font-size:11px;color:#00cc88;border:1px solid #1a3a2a;padding:4px 8px;border-radius:20px">LIVE</div>
-</div>
+<div class="chartWrap">
+<div class="priceRow"><div><div style="display:flex;gap:6px;align-items:center"><div style="width:28px;height:28px;background:#f7931a;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800">B</div><b>BTC/USD</b></div><div style="font-size:11px;color:#5a6a8a">Bitcoin - Spot</div></div><div style="font-size:11px;color:#00cc88;border:1px solid #1a3a2a;padding:4px 8px;border-radius:20px">LIVE</div></div>
 <div class="price" id="btcPrice">$63,419.84</div>
-<div class="change" id="btcChange">+1.24% (+$777.14) 24H</div>
-<canvas id="chart"></canvas>
+<div class="change" id="btcChange">+1.24%</div>
+<div id="tvChart"></div>
 <div class="tf">
-<button class="on" onclick="setTF(this,'1H')">1H</button>
-<button onclick="setTF(this,'1D')">1D</button>
-<button onclick="setTF(this,'1W')">1W</button>
-<button onclick="setTF(this,'1M')">1M</button>
-<button onclick="setTF(this,'1Y')">1Y</button>
+<button class="on" onclick="changeTF('60')">1H</button>
+<button onclick="changeTF('D')">1D</button>
+<button onclick="changeTF('W')">1W</button>
+<button onclick="changeTF('M')">1M</button>
 </div>
 </div>
-
-<div class="actions">
+<div id="tradeActions" class="actions">
 <button class="buy" onclick="doTrade('BUY')">BUY</button>
 <button class="sell" onclick="doTrade('SELL')">SELL</button>
 </div>
+<div id="tradeLocked" class="lockedArea" style="display:none;margin:12px 15px">
+<div style="font-weight:700">Real Trading Locked</div>
+<div style="font-size:12px;color:#8aa0c8;margin:8px 0">Verification opens soon - We will notify you</div>
+<button class="btn btnBlue" onclick="payUnlock()">Pay 500 NGN to Unlock REAL</button>
+</div>
+</div>
 
-<div class="deposit">
-<h3>Deposit Funds <span style="float:right;font-size:10px;color:#00cc88">Secured</span></h3>
+<!-- PORTFOLIO -->
+<div id="portfolioPage" class="page">
+<div class="box"><h3>Portfolio - Open Trades</h3><div id="tradeList"><p style="color:#5a6a8a;font-size:13px">No open trades. Use BUY/SELL on Trade tab.</p></div></div>
+</div>
+
+<!-- WALLET - DEPOSIT ONLY HERE -->
+<div id="walletPage" class="page">
+<div class="box"><h3>Wallet Balance</h3><p>REAL: <b id="wReal">$0.00</b> | DEMO: <b style="color:#00cc88">$10,000.00</b></p></div>
+<div class="box">
+<h3>Deposit Funds</h3>
+<p id="depositNote" style="font-size:12px;color:#8aa0c8;margin-bottom:10px">Admin Access - Real deposits enabled</p>
 <div id="payOptions">
 <div class="payRow">
-<div class="payOpt" onclick="focusDeposit()"><div style="width:32px;height:32px;background:#0096cc;border-radius:50%"></div><div><b>Paystack</b><span>Cards - Bank - USSD</span></div></div>
-<div class="payOpt"><div style="width:32px;height:32px;background:#00457c;border-radius:50%"></div><div><b>PayPal</b><span>Balance - Cards</span></div></div>
+<div class="payOpt"><div style="width:32px;height:32px;background:#00a3d1;border-radius:50%"></div><div><b>Paystack</b><span>Cards - Bank - USSD</span></div></div>
+<div class="payOpt"><div style="width:32px;height:32px;background:#003087;border-radius:50%"></div><div><b>PayPal</b><span>Balance - Cards</span></div></div>
 </div>
 <div class="payRow">
-<div class="payOpt"><div style="width:32px;height:32px;background:#3d95ce;border-radius:50%"></div><div><b>Venmo</b><span>Instant transfer</span></div></div>
+<div class="payOpt"><div style="width:32px;height:32px;background:#3d95ce;border-radius:50%"></div><div><b>Venmo</b><span>Instant</span></div></div>
 <div class="payOpt"><div style="width:32px;height:32px;background:#00d632;border-radius:50%"></div><div><b>Cash App</b><span>$Cashtag</span></div></div>
 </div>
 </div>
-
-<input id="email" type="email" value="astriodkeys@gmail.com" placeholder="Email">
-<input id="amount" type="number" value="1000" placeholder="Amount NGN">
-<button class="mainBtn" onclick="payDeposit()">Deposit with Paystack</button>
+<input id="email" type="email" placeholder="Email">
+<input id="amount" type="number" placeholder="Amount NGN" value="1000">
+<button id="depositBtn" class="btn" onclick="payDeposit()">Deposit with Paystack</button>
 <div id="payStatus" style="font-size:12px;margin-top:8px;color:#8aa0c8"></div>
-
-<div id="lockedArea" class="lockedBox">
+<div id="walletLocked" class="lockedArea" style="display:none">
 <div style="font-weight:700">Real Wallet Locked</div>
-<div style="font-size:12px;color:#8aa0c8;margin:8px 0">Your 5-day free trial has ended. Pay to unlock Real trading instantly.</div>
-<button onclick="payUnlock()" style="padding:12px 24px;border-radius:24px;border:none;background:#2a7bff;color:#fff;font-weight:700">Pay 500 NGN to Unlock REAL</button>
+<div style="font-size:12px;color:#8aa0c8;margin:8px 0">Pay small fee to unlock Real Wallet</div>
+<button class="btn btnBlue" onclick="payUnlock()">Pay 500 NGN to Unlock</button>
 </div>
 </div>
 </div>
 
-<div id="settingsPage" class="panel">
+<!-- MARKETS -->
+<div id="marketsPage" class="page">
+<div class="box"><h3>Markets</h3>
+<div class="tradeItem" onclick="loadTV('BINANCE:BTCUSDT','60')"><span>BTC/USD</span><span style="color:#00cc88">$63,419</span></div>
+<div class="tradeItem" onclick="loadTV('BINANCE:ETHUSDT','60')"><span>ETH/USD</span><span style="color:#00cc88">$3,210</span></div>
+<div class="tradeItem" onclick="loadTV('BINANCE:SOLUSDT','60')"><span>SOL/USD</span><span style="color:#00cc88">$142</span></div>
+</div>
+</div>
+
+<!-- PROFILE + SETTINGS -->
+<div id="profilePage" class="page">
+<div class="box">
+<h3>Profile</h3>
+<div style="display:flex;align-items:center;gap:12px;margin:10px 0">
+<div style="width:42px;height:42px;background:#2a7bff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700">X</div>
+<div><div style="font-weight:600" id="profNameDisplay">XTRADEX Trader</div><div id="verifyStatus" style="font-size:12px;color:#00cc66">Verified (Admin)</div></div>
+</div>
+<p style="font-size:13px;margin:6px 0">Email: <b id="profEmail"></b></p>
+<p style="font-size:12px;color:#8aa0c8" id="profStatus"></p>
+<input id="profName" type="text" placeholder="Your Name">
+<button class="btn btnBlue" onclick="saveProfile()">Save Profile</button>
+</div>
+<div class="box">
 <h3>Settings</h3>
 <div class="setRow"><span>Sound Effects</span><select id="soundSet" onchange="saveSettings()"><option value="on">On</option><option value="off">Off</option></select></div>
 <div class="setRow"><span>Notifications</span><select id="notifSet" onchange="saveSettings()"><option value="on">On</option><option value="off">Off</option></select></div>
-<div class="setRow"><span>Chart Type</span><select id="chartSet"><option>Candlestick</option><option>Line</option></select></div>
-<div class="setRow"><span>Theme</span><select><option>Dark</option><option>Light</option></select></div>
-<div class="setRow"><span>Currency</span><select><option>USD</option><option>NGN</option></select></div>
-<p style="font-size:11px;color:#5a6a8a;margin-top:20px;text-align:center">Created, Produced and Published by Mr Exxon<br>Sponsored by Exxon Exchange (X Trading)<br>Not affiliated with ExxonMobil.</p>
+<div class="setRow"><span>Chart Type</span><select><option>Candles</option><option>Line</option></select></div>
 </div>
-
-<div id="portfolioPage" class="panel"><h3>Portfolio</h3><p style="color:#5a6a8a;font-size:13px;margin-top:10px">No open trades. Use BUY/SELL to start.</p><div id="tradeList"></div></div>
-<div id="walletPage" class="panel"><h3>Wallet</h3><p style="color:#5a6a8a;font-size:13px">Real: <span id="wReal">$0.00</span><br>Demo: $10,000.00</p></div>
-<div id="marketsPage" class="panel"><h3>Markets</h3><div style="background:#121a2e;padding:12px;border-radius:10px;margin:8px 0">BTC/USD - $63,419 - +1.24%</div><div style="background:#121a2e;padding:12px;border-radius:10px;margin:8px 0">ETH/USD - $3,210 - +0.82%</div><div style="background:#121a2e;padding:12px;border-radius:10px;margin:8px 0">SOL/USD - $142 - +2.11%</div></div>
-<div id="profilePage" class="panel"><h3>Profile</h3><p>Email: <span id="profEmail"></span></p><p id="profStatus" style="font-size:12px;margin-top:8px"></p></div>
+</div>
 
 <div class="bottom">
 <button id="bTrade" class="active" onclick="openTab('trade')">Trade</button>
-<button id="bPort" onclick="openTab('portfolio')">Portfolio</button>
+<button id="bPortfolio" onclick="openTab('portfolio')">Portfolio</button>
 <button id="bWallet" onclick="openTab('wallet')">Wallet</button>
-<button id="bMarket" onclick="openTab('markets')">Markets</button>
+<button id="bMarkets" onclick="openTab('markets')">Markets</button>
 <button id="bProfile" onclick="openTab('profile')">Profile</button>
 </div>
 
@@ -154,77 +143,92 @@ canvas{width:100%;height:180px;margin-top:10px;background:#0a1020;border-radius:
 const ADMIN_EMAIL='astriodkeys@gmail.com';
 const PAYSTACK_KEY='pk_live_8eef9c6a227339fbc3dc6af0d48be15e0e5960bc';
 const TRIAL_DAYS=5;
-
 if(!localStorage.getItem('xtradex_created')) localStorage.setItem('xtradex_created', Date.now());
+if(!localStorage.getItem('email')) localStorage.setItem('email','astriodkeys@gmail.com');
 
 function getDaysLeft(){
  if(localStorage.getItem('xtradex_unlocked')==='yes') return 999;
- const diff = Date.now() - parseInt(localStorage.getItem('xtradex_created'));
+ const diff=Date.now()-parseInt(localStorage.getItem('xtradex_created'));
  return TRIAL_DAYS - diff/(1000*60*60*24);
 }
 
 function updateUI(){
- const email=document.getElementById('email').value.toLowerCase().trim();
+ const email=(document.getElementById('email').value||localStorage.getItem('email')||'').toLowerCase().trim();
+ localStorage.setItem('email',email);
  const isAdmin=email===ADMIN_EMAIL;
  const daysLeft=getDaysLeft();
- const isLocked=daysLeft<=0 && !isAdmin && localStorage.getItem('xtradex_unlocked')!=='yes';
- document.getElementById('profEmail').innerText=email;
- document.getElementById('timer').innerText=isAdmin?'ADMIN ACCESS - Unlimited REAL access':isLocked?'Trial Ended - 0 days left':'Free REAL Trial: '+Math.floor(daysLeft)+' days left';
- document.getElementById('realNote').innerText=isAdmin?'Real trading enabled':isLocked?'Verification required to trade':'Trial active - '+Math.floor(daysLeft)+' days left';
- document.getElementById('profStatus').innerText=isAdmin?'Verified Admin':isLocked?'Unverified - Pay to unlock':'Trial: '+Math.floor(daysLeft)+' days left';
- document.getElementById('payOptions').style.display=isLocked?'none':'block';
- document.getElementById('lockedArea').style.display=isLocked?'block':'none';
- document.getElementById('email').style.display=isLocked?'none':'block';
- document.getElementById('amount').style.display=isLocked?'none':'block';
+ const unlocked=localStorage.getItem('xtradex_unlocked')==='yes';
+ const isLocked=!isAdmin && !unlocked && daysLeft<=0 ? true : (!isAdmin && !unlocked ? false : false);
+ // Actually for your logic: non-admin always locked unless they paid 500
+ const userLocked = !isAdmin && !unlocked;
+
+ document.getElementById('timer').innerText=isAdmin?'ADMIN ACCESS - Unlimited REAL access':userLocked?'DEMO Mode - Pay 500 NGN to unlock REAL':'Free REAL Trial: '+Math.floor(daysLeft)+' days left';
+ document.getElementById('profEmail').innerText=email||'Not set';
+ document.getElementById('profStatus').innerText=isAdmin?'Verified Admin - Unlimited access':userLocked?'Unverified - Verification opens soon':'Free trial: '+Math.floor(daysLeft)+' days left';
+ document.getElementById('verifyStatus').innerText=isAdmin?'Verified (Admin)':'Unverified';
+ document.getElementById('verifyStatus').style.color=isAdmin?'#00cc66':'#ffcc00';
+ document.getElementById('realNote').innerText=isAdmin?'Real trading enabled':userLocked?'Verification opens soon':'Trial active';
+ document.getElementById('depositNote').innerText=isAdmin?'Admin Access - Real deposits enabled':'Verification opens soon - We will notify you';
+ document.getElementById('depositNote').style.color=isAdmin?'#00cc66':'#8aa0c8';
+
+ document.getElementById('tradeActions').style.display=userLocked?'none':'flex';
+ document.getElementById('tradeLocked').style.display=userLocked?'block':'none';
+ document.getElementById('payOptions').style.display=userLocked?'none':'block';
+ document.getElementById('depositBtn').style.display=userLocked?'none':'block';
+ document.getElementById('walletLocked').style.display=userLocked?'block':'none';
+ document.getElementById('email').style.display=userLocked?'none':'block';
+ document.getElementById('amount').style.display=userLocked?'none':'block';
+
+ const bal=parseFloat(localStorage.getItem('realBal')||0);
+ document.getElementById('realBal').innerText='$'+bal.toFixed(2);
+ document.getElementById('wReal').innerText='$'+bal.toFixed(2);
+ document.getElementById('profNameDisplay').innerText=localStorage.getItem('profName')||'XTRADEX Trader';
 }
 
 function setMode(m){
  document.getElementById('realBtn').className=m==='REAL'?'active':'off';
  document.getElementById('demoBtn').className=m==='DEMO'?'active':'off';
+ if(m==='DEMO'){
+   openTab('portfolio');
+ } else {
+   openTab('trade');
+ }
 }
 
 function openTab(t){
- document.getElementById('tradePage').style.display=t==='trade'?'block':'none';
- document.getElementById('portfolioPage').style.display=t==='portfolio'?'block':'none';
- document.getElementById('walletPage').style.display=t==='wallet'?'block':'none';
- document.getElementById('marketsPage').style.display=t==='markets'?'block':'none';
- document.getElementById('settingsPage').style.display=t==='settings'?'block':'none';
- document.getElementById('profilePage').style.display=t==='profile'?'block':'none';
+ document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+ document.getElementById(t+'Page').classList.add('active');
  document.querySelectorAll('.bottom button').forEach(b=>b.classList.remove('active'));
- const map={trade:'bTrade',portfolio:'bPort',wallet:'bWallet',markets:'bMarket',profile:'bProfile'};
- if(map[t]) document.getElementById(map[t]).classList.add('active');
- if(t==='profile') document.getElementById('profilePage').style.display='block';
+ const el=document.getElementById('b'+t.charAt(0).toUpperCase()+t.slice(1));
+ if(el) el.classList.add('active');
+ if(t==='profile') updateUI();
 }
 
-function focusDeposit(){document.getElementById('amount').focus()}
+function saveProfile(){
+ localStorage.setItem('profName',document.getElementById('profName').value);
+ localStorage.setItem('email',document.getElementById('email').value);
+ alert('Profile saved'); updateUI();
+}
 
 function payDeposit(){
- const em=document.getElementById('email').value;
+ const em=document.getElementById('email').value||localStorage.getItem('email');
  const am=document.getElementById('amount').value;
- const daysLeft=getDaysLeft();
- if(em.toLowerCase().trim()!==ADMIN_EMAIL && daysLeft<=0 && localStorage.getItem('xtradex_unlocked')!=='yes'){alert('Trial ended. Pay unlock fee.');return;}
- const st=document.getElementById('payStatus');
- st.innerText='Opening Paystack...';
+ if(!em||!am){alert('Enter email and amount');return;}
+ if(em.toLowerCase().trim()!==ADMIN_EMAIL && localStorage.getItem('xtradex_unlocked')!=='yes'){alert('Only Admin can deposit real money now. Users pay unlock fee.');return;}
+ const st=document.getElementById('payStatus'); st.innerText='Opening Paystack...';
  var h=PaystackPop.setup({
   key:PAYSTACK_KEY,email:em,amount:am*100,currency:'NGN',
-  callback:function(r){
-   st.innerText='Success! Ref: '+r.reference;
-   playSound();
-   if(Notification && document.getElementById('notifSet').value==='on') new Notification('XTRADEX','{body:Deposit success Ref: '+r.reference+'}');
-   let bal=parseFloat(localStorage.getItem('realBal')||0); bal+=parseInt(am); localStorage.setItem('realBal',bal);
-   document.getElementById('realBal').innerText='$'+bal.toFixed(2);
-   document.getElementById('wReal').innerText='$'+bal.toFixed(2);
-  },
-  onClose:function(){st.innerText='Payment closed';}
+  callback:function(r){st.innerText='Success! Ref: '+r.reference;playSound();let bal=parseFloat(localStorage.getItem('realBal')||0);bal+=parseInt(am);localStorage.setItem('realBal',bal);updateUI();},
+  onClose:function(){st.innerText='Closed';}
  });
  h.openIframe();
 }
 
 function payUnlock(){
- var em=document.getElementById('email').value;
+ var em=document.getElementById('email').value||localStorage.getItem('email')||'user@example.com';
  var h=PaystackPop.setup({
   key:PAYSTACK_KEY,email:em,amount:500*100,currency:'NGN',
-  callback:function(r){localStorage.setItem('xtradex_unlocked','yes');alert('Unlocked! Ref: '+r.reference);updateUI();},
+  callback:function(r){localStorage.setItem('xtradex_unlocked','yes');alert('Unlock payment success! Ref: '+r.reference+' - Admin will verify you soon');updateUI();},
   onClose:function(){}
  });
  h.openIframe();
@@ -232,65 +236,39 @@ function payUnlock(){
 
 function playSound(){
  if(document.getElementById('soundSet').value!=='on') return;
- const ctx=new (window.AudioContext||window.webkitAudioContext)();
- const o=ctx.createOscillator(); o.frequency.value=800; o.connect(ctx.destination); o.start(); o.stop(ctx.currentTime+0.2);
+ try{const ctx=new (window.AudioContext||window.webkitAudioContext)();const o=ctx.createOscillator();o.frequency.value=800;o.connect(ctx.destination);o.start();o.stop(ctx.currentTime+0.2);}catch(e){}
 }
 
 function doTrade(type){
  playSound();
- const p=document.getElementById('tradeList');
+ const price=document.getElementById('btcPrice').innerText;
+ const list=document.getElementById('tradeList');
+ if(list.innerHTML.includes('No open trades')) list.innerHTML='';
  const div=document.createElement('div');
- div.style.cssText='background:#121a2e;padding:12px;border-radius:10px;margin:8px 0;border:1px solid #1e2a4a';
- div.innerHTML='<b>'+type+' BTC/USD</b> - '+new Date().toLocaleTimeString()+'<br><span style="color:#5a6a8a;font-size:11px">Amount: $100 Demo</span>';
- p.prepend(div);
- if(Notification && document.getElementById('notifSet').value==='on') new Notification('XTRADEX Trade',{body:type+' order placed'});
+ div.className='tradeItem';
+ div.innerHTML='<div><b>'+type+' BTC/USD</b><br><small style="color:#5a6a8a">'+price+' - '+new Date().toLocaleTimeString()+'</small></div><div><b style="color:'+(type==='BUY'?'#00cc66':'#ff3b5c')+'">'+type+'</b><br><button onclick="this.parentElement.parentElement.remove()" style="font-size:10px;background:#1a2440;border:none;color:#fff;padding:4px 8px;border-radius:6px;margin-top:4px">Close</button></div>';
+ list.prepend(div);
+ if(Notification && document.getElementById('notifSet').value==='on' && Notification.permission==='granted') new Notification('XTRADEX '+type+' order placed');
  openTab('portfolio');
 }
 
 function saveSettings(){localStorage.setItem('sound',document.getElementById('soundSet').value);localStorage.setItem('notif',document.getElementById('notifSet').value)}
-function loadSettings(){
+function loadTV(symbol='BINANCE:BTCUSDT',interval='60'){
+ document.getElementById('tvChart').innerHTML='';
+ new TradingView.widget({autosize:true,symbol:symbol,interval:interval,timezone:'Etc/UTC',theme:'dark',style:'1',locale:'en',toolbar_bg:'#121a2e',enable_publishing:false,hide_top_toolbar:false,container_id:'tvChart',backgroundColor:'#121a2e',gridColor:'#1e2a4a'});
+}
+function changeTF(i){loadTV('BINANCE:BTCUSDT',i);document.querySelectorAll('.tf button').forEach(b=>b.classList.remove('on'));event.target.classList.add('on');}
+async function updatePrice(){
+ try{const r=await fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT');const j=await r.json();document.getElementById('btcPrice').innerText='$'+parseFloat(j.lastPrice).toLocaleString();const ch=parseFloat(j.priceChangePercent);document.getElementById('btcChange').innerText=(ch>=0?'+':'')+ch.toFixed(2)+'%';document.getElementById('btcChange').style.color=ch>=0?'#00cc88':'#ff3b5c';}catch(e){}
+}
+window.onload=function(){
+ document.getElementById('email').value=localStorage.getItem('email')||'astriodkeys@gmail.com';
  document.getElementById('soundSet').value=localStorage.getItem('sound')||'on';
  document.getElementById('notifSet').value=localStorage.getItem('notif')||'on';
+ document.getElementById('profName').value=localStorage.getItem('profName')||'';
  if(Notification && Notification.permission!=='granted') Notification.requestPermission();
-}
-
-function setTF(el,tf){
- document.querySelectorAll('.tf button').forEach(b=>b.classList.remove('on'));
- el.classList.add('on');
- drawChart();
-}
-
-function drawChart(){
- const c=document.getElementById('chart'); const ctx=c.getContext('2d');
- c.width=c.offsetWidth; c.height=180;
- ctx.clearRect(0,0,c.width,c.height);
- ctx.strokeStyle='#1e2a4a'; ctx.setLineDash([4,4]); ctx.beginPath(); ctx.moveTo(0,c.height/2); ctx.lineTo(c.width,c.height/2); ctx.stroke(); ctx.setLineDash([]);
- let x=10; let price=80;
- for(let i=0;i<60;i++){
-  const up=Math.random()>0.45;
-  const h=10+Math.random()*30;
-  ctx.fillStyle=up?'#00cc88':'#ff3b5c';
-  ctx.fillRect(x,price,6,h);
-  ctx.fillStyle=up?'#00cc88':'#ff3b5c';
-  ctx.fillRect(x+2,up?price-6:price+h,2,6);
-  x+=12; price+= (Math.random()-0.5)*12;
- }
-}
-
-// live BTC price
-async function updatePrice(){
- try{
-  const r=await fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT');
-  const j=await r.json();
-  document.getElementById('btcPrice').innerText='$'+parseFloat(j.lastPrice).toLocaleString();
-  document.getElementById('btcChange').innerText=(parseFloat(j.priceChangePercent)>=0?'+':'')+parseFloat(j.priceChangePercent).toFixed(2)+'% ('+(parseFloat(j.priceChange)>=0?'+$':'-$')+Math.abs(j.priceChange).toFixed(2)+') 24H';
- }catch(e){}
-}
-
-document.getElementById('email').addEventListener('input',updateUI);
-setInterval(updateUI,60000);
-setInterval(updatePrice,10000);
-window.onload=function(){loadSettings();updateUI();drawChart();updatePrice();const b=parseFloat(localStorage.getItem('realBal')||0);document.getElementById('realBal').innerText='$'+b.toFixed(2);document.getElementById('wReal').innerText='$'+b.toFixed(2);};
+ loadTV();updateUI();updatePrice();setInterval(updatePrice,10000);document.getElementById('email').addEventListener('input',updateUI);
+};
 </script>
 </body>
 </html>
