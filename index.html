@@ -1,316 +1,144 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>XTRADEX</title>
-<script src="https://js.paystack.co/v1/inline.js"></script>
-<script src="https://s3.tradingview.com/tv.js"></script>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0B1220">
+<title id="pageTitle">TRADEX - Exxon Trades</title>
+<script>
+// CREATE MANIFEST INSIDE ONE FILE - NO SECOND FILE NEEDED
+const manifest = {
+  name: localStorage.getItem('app_name') || "TRADEX - Exxon Trades",
+  short_name: localStorage.getItem('app_short') || "TRADEX",
+  start_url: "/",
+  display: "standalone",
+  background_color: "#0B1220",
+  theme_color: "#0B1220",
+  icons: [{src:"https://cdn-icons-png.flaticon.com/512/7649/7649173.png",sizes:"512x512",type:"image/png"}]
+};
+const blob = new Blob([JSON.stringify(manifest)], {type:'application/json'});
+const manifestURL = URL.createObjectURL(blob);
+document.write('<link rel="manifest" href="'+manifestURL+'">');
+</script>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
-body{background:#080c18;color:#fff;font-family:system-ui;padding-bottom:90px;-webkit-text-size-adjust:100%;overflow-x:hidden}
-input,button,select{font-size:16px!important}
-
-/* SPLASH - Before app opens - logo + From Exxon */
-#splash{position:fixed;top:0;left:0;right:0;bottom:0;background:#080c18;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;transition:opacity 0.5s}
-#splash.hide{opacity:0;pointer-events:none}
-.splashLogo{font-size:36px;font-weight:900;letter-spacing:4px;animation:fadeIn 1s}
-.splashSub{letter-spacing:5px;color:#5a6a8a;font-size:11px;margin-top:6px;animation:fadeIn 1.2s}
-.splashFrom{position:absolute;bottom:40px;text-align:center;animation:fadeIn 1.5s}
-.splashFrom small{color:#5a6a8a;font-size:11px;letter-spacing:1px}
-.splashFrom b{color:#8aa0c8;font-size:13px;display:block;margin-top:4px;letter-spacing:1px}
-.splashLine{width:80px;height:2px;background:#1e2a4a;margin:20px auto;border-radius:10px;overflow:hidden}
-.splashLine div{width:50%;height:100%;background:#2a7bff;animation:loading 1.2s infinite}
-@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-@keyframes loading{0%{transform:translateX(-100%)}100%{transform:translateX(200%)}}
-
-.top{text-align:center;padding:15px 0 5px}.top h1{letter-spacing:3px;font-size:24px}.top small{letter-spacing:4px;color:#5a6a8a;font-size:10px}
-.tabs{display:flex;background:#121a2e;margin:8px 15px;padding:5px;border-radius:30px}.tabs button{flex:1;padding:12px;border:none;border-radius:20px;font-weight:800}.tabs .active{background:#2a7bff;color:#fff}.tabs .off{background:transparent;color:#5a6a8a}
-.cards{display:flex;gap:10px;padding:10px 15px}.card{flex:1;background:#121a2e;border-radius:14px;padding:12px;border:1px solid #1e2a4a}.card .t{font-size:9px;color:#5a6a8a}.card .v{font-size:18px;font-weight:800;margin:5px 0}.card .s{font-size:10px;color:#5a6a8a}
-.chartBox{margin:0 15px;background:#121a2e;border-radius:16px;padding:10px;border:1px solid #1e2a4a;min-height:400px}
-.price{font-size:30px;font-weight:800;color:#a8ffda}.change{font-size:12px;color:#00cc88}
-#tvChart{height:320px;width:100%;border-radius:8px;margin-top:8px}
-.tf{display:flex;gap:6px;margin-top:8px;overflow-x:auto}.tf button{flex:1;min-width:45px;padding:8px;border:none;border-radius:20px;background:#1a2440;color:#5a6a8a;font-size:11px}.tf .on{background:#2a7bff;color:#fff}
-.actions{display:flex;gap:10px;margin:12px 15px}.buy{flex:1;background:#00cc66;border:none;padding:18px;border-radius:14px;color:#fff;font-weight:800}.sell{flex:1;background:#ff3b5c;border:none;padding:18px;border-radius:14px;color:#fff;font-weight:800}
-.box{margin:12px 15px;background:#121a2e;border-radius:16px;padding:15px;border:1px solid #1e2a4a}.box input,.box select{width:100%;padding:13px;border-radius:10px;border:1px solid #2a3a5a;background:#0a1020;color:#fff;margin:6px 0}
-.btn{width:100%;padding:14px;border-radius:10px;border:none;background:#00cc66;color:#fff;font-weight:700;margin-top:8px}.btnBlue{background:#2a7bff}
-.payGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}.payItem{background:#1a2440;padding:12px;border-radius:12px;display:flex;align-items:center;gap:10px;border:1px solid #1e2a4a}.payItem b{font-size:12px;display:block}.payItem span{font-size:9px;color:#5a6a8a}
-.bottom{position:fixed;bottom:0;left:0;right:0;background:#0d1220;border-top:1px solid #1e2a4a;display:flex;padding:10px 0;z-index:99}.bottom button{flex:1;background:none;border:none;color:#5a6a8a;font-size:10px}.bottom .active{color:#2a7bff}
-.tradeItem{background:#0f1629;padding:12px;border-radius:10px;margin:8px 0;border:1px solid #1e2a4a;display:flex;justify-content:space-between}
-.modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.85);display:none;align-items:center;justify-content:center;z-index:1000;padding:20px}.modal.active{display:flex}.modalBox{background:#121a2e;border-radius:16px;padding:20px;width:100%;max-width:380px;border:1px solid #2a3a5a}
-.adBox{background:#0f1629;border:1px dashed #1e2a4a;padding:10px;border-radius:10px;text-align:center;font-size:10px;color:#5a6a8a;margin:10px 15px}
+*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,sans-serif}
+body{background:#0B1220;color:white;overflow:hidden}
+#splash{position:fixed;inset:0;background:#0B1220;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;transition:.5s}
+#splash h1{font-size:50px;letter-spacing:8px;font-weight:900}
+#splash h1 span{color:#3B82F6}
+.from{margin-top:10px;letter-spacing:6px;color:#A8B8D8;font-size:13px}
+.progress{width:140px;height:2px;background:#1A253A;margin-top:24px;border-radius:2px;overflow:hidden}
+.progress div{height:100%;width:0%;background:#3B82F6;animation:load 2.2s forwards}
+@keyframes load{to{width:100%}}
+.app{display:none;height:100vh;flex-direction:column}
+.header{padding:14px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #1A253A}
+.logo{font-weight:900;font-size:22px;letter-spacing:4px;line-height:1}
+.logo small{display:block;font-size:9px;letter-spacing:4px;color:#7A8AA6;margin-top:3px}
+.badge{background:#1A253A;color:#7A8AA6;padding:6px 14px;border-radius:20px;font-size:11px}
+.card{margin:10px;background:#121C2F;border:1px solid #1E2D4A;border-radius:12px;padding:14px}
+.real .bal{font-size:28px;font-weight:800;margin:6px 0}
+.lock{color:#F59E0B;font-size:11px}
+.demo{border-color:#10B98130;background:#0E1E16}
+.demo .bal{font-size:26px;font-weight:800}
+.pair{display:flex;justify-content:space-between;padding:12px}
+.price{font-size:19px;font-weight:800}
+#tv{height:220px;margin:0 12px;background:#0F182A;border-radius:12px;overflow:hidden}
+.buy-sell{display:flex;gap:10px;padding:12px}
+.buy-sell button{flex:1;padding:15px;border:none;border-radius:10px;font-weight:800;color:white}
+.buy{background:#10B981}.sell{background:#EF4444}
+.net{padding:5px;text-align:center;font-size:11px;font-weight:700}.online{background:#10B981}.offline{background:#EF4444}
+.nav{display:flex;justify-content:space-around;padding:10px 0;border-top:1px solid #1A253A;margin-top:auto}
+.nav div{font-size:10px;color:#7A8AA6;text-align:center}.nav .active{color:#3B82F6}
+.page{display:none;padding:14px;overflow-y:auto;height:100%}
+.page.active{display:block}
+.input{width:100%;padding:12px;background:#0F182A;border:1px solid #1E2D4A;border-radius:8px;color:white;margin:8px 0}
+.btn{width:100%;padding:12px;background:#3B82F6;border:none;border-radius:8px;color:white;font-weight:800;margin-top:8px}
+.modal{position:fixed;inset:0;background:#000C;display:none;align-items:center;justify-content:center;z-index:100;padding:20px}
+.modal-box{background:#121C2F;border:1px solid #1E2D4A;border-radius:14px;padding:18px;width:100%;max-width:330px;text-align:center}
 </style>
 </head>
 <body>
+<div id="splash"><h1 id="splashName">TRADE<span>X</span></h1><div class="from">From 💹 Exxon</div><div class="progress"><div></div></div><small style="position:absolute;bottom:90px;color:#5A6A86;letter-spacing:4px">X-TRADING</small></div>
 
-<!-- SPLASH SCREEN - Before app opens - From Exxon -->
-<div id="splash">
-<div class="splashLogo">XTRADEX</div>
-<div class="splashSub">X TRADES</div>
-<div class="splashLine"><div></div></div>
-<div class="splashFrom">
-<small>From</small>
-<b>Exxon</b>
-</div>
+<div class="app" id="app">
+<div class="net online" id="net">● ONLINE</div>
+<div class="header">
+<div class="logo" id="headerLogo">TRADE<span style="color:#3B82F6">X</span><small id="headerTag">EXXON TRADES • X-TRADING</small></div>
+<div class="badge" id="badge">DEMO $10K</div>
 </div>
 
-<div class="top"><h1>XTRADEX</h1><small>X TRADES</small></div>
-<div class="tabs">
-<button id="realBtn" class="off" onclick="setMode('REAL')">REAL</button>
-<button id="demoBtn" class="active" onclick="setMode('DEMO')">DEMO</button>
+<!-- TRADE PAGE -->
+<div class="page active" id="tradePage">
+<div class="card real"><h4 style="font-size:11px;color:#7A8AA6">🔒 REAL WALLET</h4><div class="bal">$0.00</div><div class="lock">Locked - Connect licensed broker. Funds held by broker, not TRADEX.</div></div>
+<div class="card demo"><h4 style="font-size:11px;color:#10B981">🧪 DEMO - <span id="demoName">TRADEX</span></h4><div class="bal">$10,000.00</div><small style="color:#6ABF9A">5 days free, then $1 for app access</small></div>
+<div class="pair"><h3>BTC/USD</h3><div style="text-align:right"><div class="price">$63,421.20</div><div style="color:#10B981;font-size:11px">+1.24% LIVE</div></div></div>
+<div id="tv"></div>
+<div class="buy-sell"><button class="buy" onclick="alert('DEMO BUY - TRADEX')">BUY ↗</button><button class="sell" onclick="alert('DEMO SELL - TRADEX')">SELL ↘</button></div>
 </div>
 
-<div class="cards">
-<div class="card" id="realCard"><div class="t">REAL WALLET <span id="realLock" style="float:right;background:#1a2440;padding:2px 6px;border-radius:10px;font-size:8px">LOCKED</span></div><div class="v" id="realBal">$0.00</div><div class="s" id="realNote">Verification required</div></div>
-<div class="card" id="demoCard" style="border-color:#00cc66"><div class="t">DEMO WALLET <span style="float:right;background:#0a3a1a;color:#00cc88;padding:2px 6px;border-radius:10px;font-size:8px">PRACTICE</span></div><div class="v" style="color:#a8ffda" id="demoBal">$10,000.00</div><div class="s">Practice - unlimited demo funds</div></div>
+<!-- PROFILE PAGE - CHANGE NAME HERE -->
+<div class="page" id="profilePage">
+<h3>Settings - Change Name 🇳🇬</h3>
+<p style="color:#7A8AA6;font-size:12px;margin:8px 0">Change app name anytime. Will show on splash and header.</p>
+<label style="font-size:12px">App Name (e.g. TRADEX)</label>
+<input class="input" id="nameInput" placeholder="TRADEX">
+<label style="font-size:12px">Tagline (e.g. Exxon Trades)</label>
+<input class="input" id="tagInput" placeholder="Exxon Trades • X-Trading">
+<button class="btn" onclick="saveName()">Save Name - Update App</button>
+<button class="btn" style="background:#1A253A" onclick="resetName()">Reset to TRADEX</button>
+<div style="margin-top:20px;padding:12px;background:#0F182A;border-radius:10px;font-size:11px;color:#7A8AA6">
+<b style="color:white">How you earn (Legal for Nigeria + All countries):</b><br>
+• $1 after 5 days for app access (Paystack)<br>
+• Ads when they login<br>
+• Active time on data/WiFi<br>
+• Phase 2: Deriv commission when you connect broker<br>
+No personal holding of trading losses.
+</div>
 </div>
 
-<div class="adBox">AdMob - Earn per view - Your Ad Unit</div>
-
-<div class="chartBox" id="chartArea">
-<div style="display:flex;justify-content:space-between;align-items:center">
-<div style="display:flex;gap:8px;align-items:center"><div style="width:34px;height:34px;background:#f7931a;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800">B</div><div><div style="display:flex;gap:4px;align-items:center"><b id="symbolName">BTC/USD</b> <select id="symbolSelect" onchange="changeSymbol()" style="background:#1a2440;color:#fff;border:none;padding:2px 6px;border-radius:6px;font-size:10px"><option value="BINANCE:BTCUSDT">BTC/USD</option><option value="OANDA:XAUUSD">XAU/USD Gold</option><option value="BINANCE:ETHUSDT">ETH/USD</option><option value="FX:EURUSD">EUR/USD</option></select></div><div style="font-size:10px;color:#5a6a8a">Live Trading</div></div></div><div style="font-size:11px;color:#00cc88;border:1px solid #1a3a2a;padding:4px 8px;border-radius:20px">LIVE</div></div>
-<div class="price" id="btcPrice">$63,670.53</div>
-<div class="change" id="btcChange">+1.64% (+$1,027.83) 24H</div>
-<div id="tvChart"></div>
-<div class="tf">
-<button class="on" onclick="setTF('1',this)">1m</button>
-<button onclick="setTF('5',this)">5m</button>
-<button onclick="setTF('15',this)">15m</button>
-<button onclick="setTF('60',this)">1H</button>
-<button onclick="setTF('D',this)">1D</button>
-<button onclick="setTF('W',this)">1W</button>
-<button onclick="setTF('M',this)">1M</button>
+<div class="nav">
+<div class="active" onclick="showPage('tradePage',this)">📈<br>Trade</div>
+<div onclick="showPage('profilePage',this)">👤<br>Profile<br><small>Change Name</small></div>
 </div>
-<div style="display:flex;gap:8px;margin-top:8px;font-size:9px;color:#5a6a8a"><span>MA</span><span>EMA</span><span>BOLL</span><span>SAR</span><span>VOL</span><span>MACD</span></div>
 </div>
 
-<div class="actions">
-<button class="buy" onclick="doTrade('BUY')">BUY</button>
-<button class="sell" onclick="doTrade('SELL')">SELL</button>
-</div>
+<div class="modal" id="subModal"><div class="modal-box"><h3>Unlock App</h3><p style="margin:10px 0;color:#7A8AA6;font-size:13px">5-day free done. Pay $1 for access?</p><button class="btn" onclick="alert('Add your Paystack $1 link here for app access')">Pay $1 via Paystack</button><button class="btn" style="background:#1A253A" onclick="document.getElementById('subModal').style.display='none'">Later</button></div></div>
 
-<div id="pagesArea" style="display:none">
-<div class="box" id="pPortfolio"><h3>Portfolio - <span id="portfolioMode">DEMO</span> - Investing counting</h3><div id="tradeList"><p style="color:#5a6a8a;font-size:12px">No trades. BUY/SELL will count here live</p></div><p style="font-size:11px;margin-top:10px">Total P/L counting: <b id="totalPL">$0.00</b></p></div>
-<div class="box" id="pWallet"><h3>Wallet & Deposit - Real Money</h3><p>REAL: <b id="wReal">$0.00</b> | DEMO: <b id="wDemo">$10,000.00</b></p>
-<h3 style="margin-top:15px">Payment Methods - You get money</h3>
-<div class="payGrid">
-<div class="payItem" onclick="openDeposit('Paystack')"><div style="width:30px;height:30px;background:#00a3ff;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:10px">P</div><div><b>Paystack</b><span>Cards, Bank, USSD</span></div></div>
-<div class="payItem" onclick="openDeposit('PayPal')"><div style="width:30px;height:30px;background:#003087;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:10px">PP</div><div><b>PayPal</b><span>Balance - Cards</span></div></div>
-<div class="payItem" onclick="openDeposit('Zelle')"><div style="width:30px;height:30px;background:#6d1ed4;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:10px">Z</div><div><b>Zelle</b><span>US Bank Transfer</span></div></div>
-<div class="payItem" onclick="openDeposit('Venmo')"><div style="width:30px;height:30px;background:#3d95ce;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:10px">V</div><div><b>Venmo</b><span>Instant</span></div></div>
-<div class="payItem" onclick="openDeposit('BTC')"><div style="width:30px;height:30px;background:#f7931a;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800">B</div><div><b>BTC Crypto</b><span>Bitcoin</span></div></div>
-<div class="payItem" onclick="openDeposit('Giftcard')"><div style="width:30px;height:30px;background:#00c853;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:10px">G</div><div><b>Giftcards</b><span>All except Amazon</span></div></div>
-</div>
-<p style="font-size:9px;color:#5a6a8a;margin-top:6px">Giftcards: Steam, Google Play, iTunes, Walmart, Vanilla, Visa Gift - All except Amazon low rate</p>
-<div id="depositFormArea" style="margin-top:12px;display:none">
-<input id="email" type="email" placeholder="Your Email"><input id="amount" type="number" placeholder="Amount Min $2" value="10">
-<select id="payMethodSelect"><option>Paystack</option><option>PayPal</option><option>Zelle</option><option>Venmo</option><option>BTC</option><option>Giftcard - Steam</option><option>Giftcard - Google Play</option><option>Giftcard - iTunes</option><option>Giftcard - Walmart</option></select>
-<input id="giftCode" type="text" placeholder="Giftcard Code / BTC Tx / Zelle Email" style="display:none">
-<button class="btn" onclick="payDeposit()">Deposit Real Money - You Earn</button>
-<button class="btn btnBlue" id="unlockBtn" onclick="payUnlock()" style="display:none">Pay $1 to Unlock REAL</button>
-<div id="payStatus" style="font-size:12px;margin-top:8px;color:#8aa0c8"></div>
-</div>
-</div>
-<div class="box" id="pMarkets"><h3>Markets</h3><div class="tradeItem" onclick="selectMarket('BINANCE:BTCUSDT','BTC/USD')"><span>BTC/USD</span><span id="mBTC">$63,670</span></div><div class="tradeItem" onclick="selectMarket('OANDA:XAUUSD','XAU/USD')"><span>XAU/USD Gold</span><span>$4,850</span></div><div class="tradeItem" onclick="selectMarket('BINANCE:ETHUSDT','ETH/USD')"><span>ETH/USD</span><span>$3,210</span></div></div>
-<div class="box" id="pProfile"><h3>Profile & Verification</h3><p>Email: <b id="profEmail"></b></p><p id="profStatus" style="font-size:12px;color:#8aa0c8;margin:6px 0"></p><p id="daysLeftInfo" style="font-size:11px;color:#ffcc00"></p><input id="profName" type="text" placeholder="Full Name"><button class="btn btnBlue" onclick="saveProfile()">Save</button><div style="margin-top:10px;background:#0f1629;padding:10px;border-radius:10px;font-size:11px;color:#8aa0c8">Admin astriodkeys@gmail.com unlocked always. Users: 5 days free REAL, then $1 unlock. Min invest $2. You earn from deposits + ads + logins + data/WiFi usage.</div></div>
-</div>
-
-<div class="bottom">
-<button id="bTrade" class="active" onclick="openTab('trade')">Trade</button>
-<button id="bPort" onclick="openTab('portfolio')">Portfolio</button>
-<button id="bWallet" onclick="openTab('wallet')">Wallet</button>
-<button id="bMarket" onclick="openTab('markets')">Markets</button>
-<button id="bProfile" onclick="openTab('profile')">Profile</button>
-</div>
-
-<div class="modal" id="depositModal"><div class="modalBox"><h3>Real Locked</h3><p style="font-size:13px;color:#8aa0c8;margin:10px 0">Verification required. Use DEMO or pay $1 unlock in Wallet.</p><button class="btn btnBlue" onclick="openTab('wallet');closeModal()">Go to Wallet - Deposit</button><button class="btn" style="background:#1a2440" onclick="setMode('DEMO');closeModal()">Use DEMO Practice $10k</button><button class="btn" style="background:transparent;color:#5a6a8a" onclick="closeModal()">Close</button></div></div>
-
+<script src="https://s.tradingview.com/tv.js"></script>
 <script>
-const ADMIN='astriodkeys@gmail.com';
-const KEY='pk_live_8eef9c6a227339fbc3dc6af0d48be15e0e5960bc';
-const TRIAL=5;
-let mode='DEMO';
-let currentSymbol='BINANCE:BTCUSDT';
-if(!localStorage.getItem('created')) localStorage.setItem('created',Date.now());
-if(!localStorage.getItem('email')) localStorage.setItem('email',ADMIN);
-if(!localStorage.getItem('demoBal')) localStorage.setItem('demoBal','10000');
-if(!localStorage.getItem('realBal')) localStorage.setItem('realBal','0');
-if(!localStorage.getItem('trades')) localStorage.setItem('trades','[]');
-
-function getDaysLeft(){ if(localStorage.getItem('unlocked')==='yes') return 999; const diff=Date.now()-parseInt(localStorage.getItem('created')); return TRIAL - diff/(1000*60*60*24); }
-
-function updateUI(){
- const em=(document.getElementById('email')?.value||localStorage.getItem('email')||'').toLowerCase().trim(); if(em) localStorage.setItem('email',em);
- const isAdmin=em===ADMIN; const daysLeft=getDaysLeft(); const unlocked=localStorage.getItem('unlocked')==='yes'; const canUseReal=isAdmin||unlocked||daysLeft>0;
- document.getElementById('realLock').innerText=canUseReal?'UNLOCKED':'LOCKED'; document.getElementById('realLock').style.color=canUseReal?'#00cc88':'#5a6a8a';
- document.getElementById('realNote').innerText=isAdmin?'Real trading enabled - Admin':canUseReal?'Free trial: '+Math.floor(daysLeft)+' days left':'Pay $1 to unlock';
- document.getElementById('profEmail').innerText=em; document.getElementById('profStatus').innerText=isAdmin?'Verified Admin - Always unlocked':canUseReal?'Trial: '+Math.floor(daysLeft)+' days left':'Trial expired - Pay $1';
- document.getElementById('daysLeftInfo').innerText=isAdmin?'From Exxon - Admin account':canUseReal?'From Exxon - You have '+Math.floor(daysLeft)+' days free REAL. Min $2 invest.':'From Exxon - Pay $1 to unlock REAL';
- document.getElementById('portfolioMode').innerText=mode;
- const dBal=parseFloat(localStorage.getItem('demoBal')); const rBal=parseFloat(localStorage.getItem('realBal'));
- document.getElementById('demoBal').innerText='$'+dBal.toLocaleString(undefined,{minimumFractionDigits:2}); document.getElementById('realBal').innerText='$'+rBal.toFixed(2);
- if(document.getElementById('wDemo')){ document.getElementById('wDemo').innerText='$'+dBal.toLocaleString(undefined,{minimumFractionDigits:2}); document.getElementById('wReal').innerText='$'+rBal.toFixed(2); }
- if(document.getElementById('email')) document.getElementById('email').value=em;
- document.getElementById('unlockBtn').style.display=getDaysLeft()<=0 && !isAdmin && !unlocked?'block':'none';
+setTimeout(()=>{document.getElementById('splash').style.opacity='0';setTimeout(()=>{document.getElementById('splash').style.display='none';document.getElementById('app').style.display='flex'},500)},2200);
+new TradingView.widget({"autosize":true,"symbol":"BINANCE:BTCUSD","interval":"60","timezone":"Etc/UTC","theme":"dark","style":"1","locale":"en","toolbar_bg":"#0F182A","enable_publishing":false,"hide_top_toolbar":true,"container_id":"tv"});
+function showPage(id,el){
+document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+document.getElementById(id).classList.add('active');
+document.querySelectorAll('.nav div').forEach(d=>d.classList.remove('active'));
+el.classList.add('active');
 }
-
-function setMode(m){
- const em=localStorage.getItem('email'); const isAdmin=em===ADMIN; const daysLeft=getDaysLeft(); const unlocked=localStorage.getItem('unlocked')==='yes'; const canUseReal=isAdmin||unlocked||daysLeft>0;
- if(m==='REAL' && !canUseReal){ document.getElementById('depositModal').classList.add('active'); return; }
- mode=m; document.getElementById('realBtn').className=m==='REAL'?'active':'off'; document.getElementById('demoBtn').className=m==='DEMO'?'active':'off';
- document.getElementById('demoCard').style.borderColor=m==='DEMO'?'#00cc66':'#1e2a4a'; document.getElementById('realCard').style.borderColor=m==='REAL'?'#00cc66':'#1e2a4a';
- setTimeout(()=>{ loadTV(currentSymbol,'60'); }, 100); openTab('trade'); updateUI();
+function saveName(){
+const n=document.getElementById('nameInput').value || 'TRADEX';
+const t=document.getElementById('tagInput').value || 'EXXON TRADES • X-TRADING';
+localStorage.setItem('app_name',n);
+localStorage.setItem('app_tag',t);
+localStorage.setItem('app_short',n.substring(0,7));
+document.getElementById('headerLogo').innerHTML=n.substring(0,5)+'<span style="color:#3B82F6">'+n.slice(-1)+'</span><small id="headerTag">'+t+'</small>';
+document.getElementById('splashName').innerHTML=n.substring(0,5)+'<span>'+n.slice(-1)+'</span>';
+document.getElementById('demoName').textContent=n;
+document.getElementById('pageTitle').textContent=n+' - Exxon Trades';
+alert('Name changed to '+n+'! Close app and Add to Home Screen again to see new name on icon.');
 }
-
-function openTab(t){
- document.querySelectorAll('.bottom button').forEach(b=>b.classList.remove('active'));
- const chartArea=document.getElementById('chartArea'); const cards=document.querySelector('.cards'); const actions=document.querySelector('.actions'); const pages=document.getElementById('pagesArea'); const ad=document.querySelector('.adBox');
- if(t==='trade'){ chartArea.style.display='block'; cards.style.display='flex'; actions.style.display='flex'; pages.style.display='none'; ad.style.display='block'; document.getElementById('bTrade').classList.add('active'); setTimeout(()=>{ loadTV(currentSymbol,'60'); },150); }
- else { chartArea.style.display='none'; cards.style.display='none'; actions.style.display='none'; pages.style.display='block'; ad.style.display='none'; document.getElementById('pPortfolio').style.display=t==='portfolio'?'block':'none'; document.getElementById('pWallet').style.display=t==='wallet'?'block':'none'; document.getElementById('pMarkets').style.display=t==='markets'?'block':'none'; document.getElementById('pProfile').style.display=t==='profile'?'block':'none'; const map={portfolio:'bPort',wallet:'bWallet',markets:'bMarket',profile:'bProfile'}; document.getElementById(map[t]).classList.add('active'); if(t==='wallet') document.getElementById('depositFormArea').style.display='block'; }
+function resetName(){
+localStorage.clear();
+location.reload();
 }
-
-function doTrade(type){
- const em=localStorage.getItem('email'); const isAdmin=em===ADMIN; const daysLeft=getDaysLeft(); const unlocked=localStorage.getItem('unlocked')==='yes'; const canUseReal=isAdmin||unlocked||daysLeft>0;
- if(mode==='REAL' && !canUseReal){ document.getElementById('depositModal').classList.add('active'); return; }
- let key=mode==='REAL'?'realBal':'demoBal'; let bal=parseFloat(localStorage.getItem(key)||0); if(bal<2){ alert('Min $2 required. Deposit in Wallet.'); if(mode==='REAL') openTab('wallet'); return; }
- const invest=Math.min(bal,10); bal-=invest; localStorage.setItem(key,bal);
- const price=document.getElementById('btcPrice').innerText; const tr={id:Date.now(),type:type,symbol:currentSymbol,mode:mode,price:price,invest:invest,openTime:Date.now()};
- let trades=JSON.parse(localStorage.getItem('trades')||'[]'); trades.unshift(tr); localStorage.setItem('trades',JSON.stringify(trades));
- renderTrades(); try{ const ctx=new (window.AudioContext||window.webkitAudioContext)(); const o=ctx.createOscillator(); o.frequency.value=type==='BUY'?900:400; o.connect(ctx.destination); o.start(); o.stop(ctx.currentTime+0.15);}catch(e){} updateUI(); openTab('portfolio');
+const saved=localStorage.getItem('app_name');
+if(saved){
+document.getElementById('headerLogo').innerHTML=saved.substring(0,5)+'<span style="color:#3B82F6">'+saved.slice(-1)+'</span><small>'+ (localStorage.getItem('app_tag')||'EXXON TRADES • X-TRADING') +'</small>';
+document.getElementById('splashName').innerHTML=saved.substring(0,5)+'<span>'+saved.slice(-1)+'</span>';
+document.getElementById('nameInput').value=saved;
+document.getElementById('tagInput').value=localStorage.getItem('app_tag')||'';
 }
-
-function renderTrades(){
- const list=document.getElementById('tradeList'); let trades=JSON.parse(localStorage.getItem('trades')||'[]'); trades=trades.filter(t=>t.mode===mode);
- if(trades.length===0){ list.innerHTML='<p style="color:#5a6a8a;font-size:12px">No '+mode+' trades. Chart moving and counting live.</p>'; return; }
- list.innerHTML=''; trades.forEach(tr=>{
-  const livePL=(Math.random()*6-2).toFixed(2); const div=document.createElement('div'); div.className='tradeItem';
-  div.innerHTML='<div><b>'+tr.type+' '+tr.symbol.split(':')[1]+' ('+tr.mode+')</b><br><small style="color:#5a6a8a">'+tr.price+' - Invest $'+tr.invest+' - '+new Date(tr.openTime).toLocaleTimeString()+'</small><br><small style="color:'+(livePL>=0?'#00cc88':'#ff3b5c')+'">P/L counting: $'+livePL+' live</small></div><div style="text-align:right"><b style="color:'+(tr.type==='BUY'?'#00cc66':'#ff3b5c')+'">'+tr.type+'</b><br><button onclick="closeTrade('+tr.id+')" style="font-size:10px;background:#1a2440;border:none;color:#fff;padding:6px 10px;border-radius:6px;margin-top:6px">Close +$'+livePL+'</button></div>';
-  list.appendChild(div);
- });
-}
-
-function closeTrade(id){ let trades=JSON.parse(localStorage.getItem('trades')||'[]'); const idx=trades.findIndex(t=>t.id===id); if(idx===-1) return; const tr=trades[idx]; const profit=tr.invest + (Math.random()*4-1); let bal=parseFloat(localStorage.getItem(tr.mode==='REAL'?'realBal':'demoBal')||0); bal+=profit; localStorage.setItem(tr.mode==='REAL'?'realBal':'demoBal',bal); trades.splice(idx,1); localStorage.setItem('trades',JSON.stringify(trades)); renderTrades(); updateUI(); }
-
-function openDeposit(m){ document.getElementById('depositFormArea').style.display='block'; document.getElementById('payMethodSelect').value=m; const gift=document.getElementById('giftCode'); gift.style.display=m.includes('Giftcard')||m==='BTC'||m==='Zelle'||m==='Venmo'?'block':'none'; gift.placeholder=m==='BTC'?'BTC Tx ID / Wallet':m==='Zelle'?'Zelle Email':m==='Venmo'?'Venmo Username':m.includes('Giftcard')?'Giftcard Code':''; document.getElementById('depositFormArea').scrollIntoView(); }
-
-function payDeposit(){
- const em=document.getElementById('email').value||localStorage.getItem('email'); const am=parseFloat(document.getElementById('amount').value); const method=document.getElementById('payMethodSelect').value; const code=document.getElementById('giftCode').value;
- if(!em||!am){alert('Enter email and amount');return;} if(am<2){alert('Min $2');return;}
- const st=document.getElementById('payStatus');
- if(method==='Paystack'){ st.innerText='Opening Paystack...'; var h=PaystackPop.setup({key:KEY,email:em,amount:am*100,currency:'NGN',callback:function(r){st.innerText='Success Ref: '+r.reference+' - You earned real money! Ad + data earnings counted.'; let b=parseFloat(localStorage.getItem('realBal')||0); b+=am; localStorage.setItem('realBal',b); updateUI();},onClose:function(){st.innerText='Closed';}}); h.openIframe(); }
- else { st.innerText=method+' deposit submitted. Code: '+(code||'N/A')+' - Admin verify will credit REAL. You get money.'; setTimeout(()=>{ let b=parseFloat(localStorage.getItem('realBal')||0); b+=am; localStorage.setItem('realBal',b); updateUI(); st.innerText=method+' verified! $'+am+' added.'; },1500); }
-}
-
-function payUnlock(){ var em=document.getElementById('email').value||localStorage.getItem('email')||'user@example.com'; var h=PaystackPop.setup({key:KEY,email:em,amount:100*100,currency:'NGN',callback:function(r){localStorage.setItem('unlocked','yes');alert('Unlocked REAL! Ref: '+r.reference+' - Now invest $2 upward. You earn $1.');updateUI();},onClose:function(){}}); h.openIframe(); }
-function saveProfile(){localStorage.setItem('profName',document.getElementById('profName').value);localStorage.setItem('email',document.getElementById('email').value);updateUI();alert('Saved');}
-function closeModal(){document.getElementById('depositModal').classList.remove('active');}
-function changeSymbol(){ currentSymbol=document.getElementById('symbolSelect').value; loadTV(currentSymbol,'60'); document.getElementById('symbolName').innerText=currentSymbol.split(':')[1].replace('USDT','/USD').replace('XAUUSD','XAU/USD'); }
-function selectMarket(sym,name){ currentSymbol=sym; document.getElementById('symbolName').innerText=name; openTab('trade'); loadTV(sym,'60'); }
-
-function loadTV(symbol='BINANCE:BTCUSDT', interval='60'){
- document.getElementById('tvChart').innerHTML='';
- try{ new TradingView.widget({autosize:true,symbol:symbol,interval:interval,timezone:'Etc/UTC',theme:'dark',style:'1',locale:'en',toolbar_bg:'#121a2e',enable_publishing:false,hide_top_toolbar:false,container_id:'tvChart',backgroundColor:'#121a2e',gridColor:'#1e2a4a',studies:['MAExp@tv-basicstudies','BollingerBands@tv-basicstudies','MACD@tv-basicstudies','RSI@tv-basicstudies','Volume@tv-basicstudies'],withdateranges:true}); } catch(e){ document.getElementById('tvChart').innerHTML='<p style="color:#5a6a8a;text-align:center;padding:20px">Loading live chart...</p>'; }
-}
-function setTF(tf,el){ if(el){ document.querySelectorAll('.tf button').forEach(b=>b.classList.remove('on')); el.classList.add('on'); } loadTV(currentSymbol,tf); }
-async function updatePrice(){ try{ const r=await fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT'); const j=await r.json(); document.getElementById('btcPrice').innerText='$'+parseFloat(j.lastPrice).toLocaleString(); const ch=parseFloat(j.priceChangePercent); document.getElementById('btcChange').innerText=(ch>=0?'+':'')+ch.toFixed(2)+'% (+$'+Math.abs(j.priceChange).toFixed(2)+') 24H'; const m=document.getElementById('mBTC'); if(m) m.innerText='$'+parseFloat(j.lastPrice).toLocaleString(); }catch(e){} }
-
-window.onload=function(){
- // SPLASH LOGIC - From Exxon
- setTimeout(()=>{ document.getElementById('splash').classList.add('hide'); setTimeout(()=>{ document.getElementById('splash').style.display='none'; },500); },2200);
-
- if(!document.getElementById('email')){ const inp=document.createElement('input'); inp.id='email'; inp.style.display='none'; inp.value=localStorage.getItem('email'); document.body.appendChild(inp); } else { document.getElementById('email').value=localStorage.getItem('email')||ADMIN; }
- loadTV(currentSymbol,'60'); renderTrades(); updateUI(); updatePrice();
- setInterval(updatePrice,8000);
- setInterval(()=>{ const el=document.getElementById('totalPL'); if(el) el.innerText='$'+(Math.random()*5-1).toFixed(2); },1500);
- setInterval(renderTrades,3000);
- const emailEl=document.getElementById('email'); if(emailEl) emailEl.addEventListener('input',updateUI);
-};
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Trading App - Deposit</title>
-<script src="https://js.paystack.co/v1/inline.js"></script>
-</head>
-<body style="font-family:system-ui;padding:20px;background:#0f1115;color:#fff;max-width:480px;margin:auto">
-<h2>My Trading App</h2>
-<div style="background:#1a1d26;padding:20px;border-radius:16px;margin-top:20px">
-<h3>Deposit to Trade</h3>
-<input id="email" type="email" value="astriodkeys@gmail.com" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#0f1115;color:#fff;margin:8px 0">
-<input id="amount" type="number" value="1000" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#0f1115;color:#fff;margin:8px 0">
-<button onclick="payWithPaystack()" style="background:#00cc66;color:#fff;border:none;padding:14px;border-radius:10px;width:100%;font-size:16px;font-weight:600">Deposit Now</button>
-<div id="status" style="margin-top:15px"></div>
-</div>
-<script>
-const PAYSTACK_KEY = 'pk_live_8eef9c6a227339fbc3dc6af0d48be15e0e5960bc';
-function payWithPaystack(){
-  const statusEl = document.getElementById('status');
-  const email = document.getElementById('email').value;
-  const amount = document.getElementById('amount').value;
-  if(!email || !amount){
-    statusEl.innerHTML = 'Enter email and amount';
-    return;
-  }
-  statusEl.innerHTML = 'Opening Paystack...';
-  let handler = PaystackPop.setup({
-    key: PAYSTACK_KEY,
-    email: email,
-    amount: amount * 100,
-    currency: 'NGN',
-    callback: function(response){
-      statusEl.innerHTML = 'Success Ref: ' + response.reference;
-    },
-    onClose: function(){
-      statusEl.innerHTML = 'Payment closed';
-    }
-  });
-  handler.openIframe();
-}
-<!-- OFFLINE / ONLINE BAR -->
-<div id="offlineBar" style="display:none;position:fixed;top:0;left:0;right:0;background:#ff3b5c;color:#fff;text-align:center;padding:8px;font-size:11px;font-weight:700;z-index:10000">OFFLINE - No WiFi/Data - Connect to trade</div>
-<div id="onlineBar" style="display:none;position:fixed;top:0;left:0;right:0;background:#00cc66;color:#fff;text-align:center;padding:8px;font-size:11px;font-weight:700;z-index:10000">ONLINE - Live trading - Chart moving</div>
-body.offline .chartBox{opacity:0.5;pointer-events:none}
-body.offline .actions button{opacity:0.3;pointer-events:none}
-// OFFLINE HANDLING - If no data or WiFi, app offline
-function checkOnline(){
- const offlineBar=document.getElementById('offlineBar');
- const onlineBar=document.getElementById('onlineBar');
- if(!navigator.onLine){
-   document.body.classList.add('offline');
-   offlineBar.style.display='block';
-   onlineBar.style.display='none';
-   document.getElementById('btcChange').innerText='OFFLINE - Trading paused - Turn on Data/WiFi';
-   document.getElementById('btcChange').style.color='#ff3b5c';
-   console.log('User OFFLINE - No data/WiFi - Trading stopped - You not earning');
-   // Stop price updates
-   if(window.priceInterval) clearInterval(window.priceInterval);
- } else {
-   document.body.classList.remove('offline');
-   offlineBar.style.display='none';
-   onlineBar.style.display='block';
-   setTimeout(()=>{ onlineBar.style.display='none'; },3000);
-   document.getElementById('btcChange').style.color='#00cc88';
-   console.log('User ONLINE - Data/WiFi on - Chart moving - You earning from ads + data');
-   // Reload chart and price when back online
-   loadTV(currentSymbol,'60');
-   updatePrice();
- }
-}
-
-window.addEventListener('online', checkOnline);
-window.addEventListener('offline', checkOnline);
-
-// Check on app open
-setTimeout(checkOnline, 1000);
- self.addEventListener('install', e=>{
- e.waitUntil(caches.open('xtradex-v1').then(cache=>cache.addAll(['/','/index.html'])));
-});
-self.addEventListener('fetch', e=>{
- e.respondWith(caches.match(e.request).then(res=>res||fetch(e.request).catch(()=>caches.match('/index.html'))));
-});
- if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js'); }
+function checkNet(){const b=document.getElementById('net');if(navigator.onLine){b.textContent='● ONLINE - Live Data';b.className='net online'}else{b.textContent='● OFFLINE - No Internet';b.className='net offline'}}setInterval(checkNet,3000);
 </script>
 </body>
 </html>
