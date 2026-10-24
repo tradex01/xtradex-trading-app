@@ -2,39 +2,143 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Deposit</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>XTRADEX</title>
+<style>*{touch-action:manipulation} input,button{font-size:16px!important}</style>
+<script src="https://js.paystack.co/v1/inline.js"></script>
 </head>
-<body style="font-family:system-ui;padding:20px;background:#0f1115;color:#fff;max-width:480px;margin:auto">
-<h2>My Trading App</h2>
-<div style="background:#1a1d26;padding:20px;border-radius:16px">
-<h3>Deposit to Trade</h3>
-<input id="email" type="email" value="astriodkeys@gmail.com" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#0f1115;color:#fff;margin:8px 0">
-<input id="amount" type="number" value="1000" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#0f1115;color:#fff;margin:8px 0">
-<button onclick="pay()" style="background:#00cc66;color:#fff;border:none;padding:14px;border-radius:10px;width:100%;font-size:16px;font-weight:600">Deposit Now</button>
-<div id="status" style="margin-top:15px"></div>
+<body style="font-family:system-ui;padding:20px;background:#0a0e1a;color:#fff;max-width:480px;margin:auto">
+<h2 style="text-align:center;margin:5px">XTRADEX<br><small style="letter-spacing:3px;color:#888;font-size:10px">X TRADES</small></h2>
+
+<div style="display:flex;gap:8px;background:#12182a;padding:6px;border-radius:30px;margin:15px 0">
+<button onclick="setMode('REAL')" id="realBtn" style="flex:1;padding:10px;border-radius:20px;border:none;background:#2a7bff;color:#fff;font-weight:700">REAL</button>
+<button onclick="setMode('DEMO')" id="demoBtn" style="flex:1;padding:10px;border-radius:20px;border:none;background:transparent;color:#888">DEMO</button>
 </div>
+
+<div id="timer" style="text-align:center;background:#1a233a;padding:10px;border-radius:10px;font-size:13px;margin-bottom:12px"></div>
+
+<div id="realArea" style="background:#12182a;padding:20px;border-radius:16px">
+<h3 style="margin:0">Deposit Funds</h3>
+<p style="color:#888;font-size:12px;margin:5px 0 12px 0" id="statusText"></p>
+
+<div id="depositForm">
+<input id="email" type="email" value="astriodkeys@gmail.com" style="width:100%;padding:14px;border-radius:10px;border:1px solid #333;background:#0a0e1a;color:#fff;margin:6px 0">
+<input id="amount" type="number" value="1000" style="width:100%;padding:14px;border-radius:10px;border:1px solid #333;background:#0a0e1a;color:#fff;margin:6px 0">
+<button onclick="payDeposit()" style="width:100%;padding:15px;border-radius:12px;border:none;background:#00cc66;color:#fff;font-weight:700">Deposit with Paystack</button>
+<div id="payStatus" style="margin-top:10px;font-size:13px"></div>
+</div>
+
+<div id="lockedArea" style="display:none;text-align:center;background:#1a1d26;padding:20px;border-radius:12px">
+<p style="margin:8px 0;font-weight:700">Real Wallet Locked</p>
+<p style="font-size:12px;color:#888;margin:0 0 12px 0">Your 5-day free trial has ended. Pay to unlock Real trading instantly.</p>
+<button onclick="payUnlock()" style="padding:12px 25px;border-radius:25px;border:none;background:#2a7bff;color:#fff;font-weight:700">Pay 500 NGN to Unlock REAL</button>
+<p style="font-size:11px;color:#666;margin-top:10px">Or wait for verification opening</p>
+</div>
+</div>
+
+<div id="demoArea" style="display:none;background:#12182a;padding:20px;border-radius:16px;text-align:center">
+<h3>DEMO Mode - $10,000 Demo Funds</h3>
+<p style="color:#888;font-size:13px">Real deposits disabled in Demo</p>
+</div>
+
 <script>
+const ADMIN_EMAIL='astriodkeys@gmail.com';
 const PAYSTACK_KEY='pk_live_8eef9c6a227339fbc3dc6af0d48be15e0e5960bc';
-var s=document.createElement('script');
-s.src='https://js.paystack.co/v1/inline.js';
-document.head.appendChild(s);
-function pay(){
-  var em=document.getElementById('email').value;
-  var am=document.getElementById('amount').value;
-  var st=document.getElementById('status');
-  if(!em||!am){st.innerHTML='Enter email and amount';return;}
-  st.innerHTML='Opening...';
+const TRIAL_DAYS=5;
+
+if(!localStorage.getItem('xtradex_created')){
+  localStorage.setItem('xtradex_created', Date.now());
+}
+
+function getDaysLeft(){
+  if(localStorage.getItem('xtradex_unlocked')==='yes') return 999;
+  const created = parseInt(localStorage.getItem('xtradex_created'));
+  const now = Date.now();
+  const diff = now - created;
+  const daysPassed = diff / (1000*60*60*24);
+  return TRIAL_DAYS - daysPassed;
+}
+
+function updateUI(){
+  const email = document.getElementById('email').value.toLowerCase().trim();
+  const isAdmin = (email === ADMIN_EMAIL);
+  const daysLeft = getDaysLeft();
+  const isLocked = daysLeft <= 0 && !isAdmin && localStorage.getItem('xtradex_unlocked')!=='yes';
+  
+  const timerEl = document.getElementById('timer');
+  const statusText = document.getElementById('statusText');
+  const depositForm = document.getElementById('depositForm');
+  const lockedArea = document.getElementById('lockedArea');
+
+  if(isAdmin){
+    timerEl.innerHTML='ADMIN ACCESS - Unlimited REAL access';
+    timerEl.style.background='#0a2a1a';
+    statusText.innerHTML='Admin - Real deposits enabled';
+    statusText.style.color='#00cc66';
+    depositForm.style.display='block';
+    lockedArea.style.display='none';
+  } else if(isLocked){
+    timerEl.innerHTML='Trial Ended - 0 days left';
+    timerEl.style.background='#2a1a1a';
+    statusText.innerHTML='Trial ended - Pay to unlock';
+    depositForm.style.display='none';
+    lockedArea.style.display='block';
+  } else {
+    const days = Math.floor(daysLeft);
+    const hours = Math.floor((daysLeft - days)*24);
+    timerEl.innerHTML='Free REAL Trial: '+days+' days '+hours+' hours left';
+    timerEl.style.background='#1a233a';
+    statusText.innerHTML='You have '+days+' days free REAL trading - deposit enabled';
+    statusText.style.color='#888';
+    depositForm.style.display='block';
+    lockedArea.style.display='none';
+  }
+}
+
+function setMode(m){
+  document.getElementById('realBtn').style.background = m==='REAL' ? '#2a7bff' : 'transparent';
+  document.getElementById('realBtn').style.color = m==='REAL' ? '#fff' : '#888';
+  document.getElementById('demoBtn').style.background = m==='DEMO' ? '#2a7bff' : 'transparent';
+  document.getElementById('demoBtn').style.color = m==='DEMO' ? '#fff' : '#888';
+  document.getElementById('realArea').style.display = m==='REAL' ? 'block' : 'none';
+  document.getElementById('demoArea').style.display = m==='DEMO' ? 'block' : 'none';
+}
+
+function payDeposit(){
+  const em=document.getElementById('email').value;
+  const am=document.getElementById('amount').value;
+  const daysLeft=getDaysLeft();
+  if(em.toLowerCase().trim()!==ADMIN_EMAIL && daysLeft<=0 && localStorage.getItem('xtradex_unlocked')!=='yes'){
+    alert('Your free trial ended. Pay unlock fee first.');
+    return;
+  }
+  var st=document.getElementById('payStatus');
+  st.innerHTML='Opening Paystack...';
   var h=PaystackPop.setup({
-    key:PAYSTACK_KEY,
-    email:em,
-    amount:am*100,
-    currency:'NGN',
-    callback:function(r){st.innerHTML='Success: '+r.reference},
-    onClose:function(){st.innerHTML='Closed'}
+    key:PAYSTACK_KEY,email:em,amount:am*100,currency:'NGN',
+    callback:function(r){st.innerHTML='Success! Ref: '+r.reference;},
+    onClose:function(){st.innerHTML='Closed';}
   });
   h.openIframe();
 }
+
+function payUnlock(){
+  var em=document.getElementById('email').value;
+  var h=PaystackPop.setup({
+    key:PAYSTACK_KEY,email:em,amount:500*100,currency:'NGN',
+    callback:function(r){
+      localStorage.setItem('xtradex_unlocked','yes');
+      alert('Unlocked! Ref: '+r.reference);
+      updateUI();
+    },
+    onClose:function(){}
+  });
+  h.openIframe();
+}
+
+document.getElementById('email').addEventListener('input', updateUI);
+setInterval(updateUI, 60000);
+window.onload=function(){updateUI(); setMode('REAL');};
 </script>
 </body>
 </html>
