@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>XTRADEX Trading</title>
+<script src="https://js.paystack.co/v1/inline.js"></script>
+<style>
+body{margin:0;padding:12px;background:#0a0e1a;color:#fff;font-family:-apple-system,sans-serif}
+.card{background:#161c2e;border-radius:16px;padding:16px;margin:12px 0;border:1px solid #232d4a}
+.bal{font-size:34px;font-weight:900;color:#00ff88}
+input{width:100%;padding:14px;border-radius:12px;border:1px solid #334;background:#0a0e1a;color:#fff;margin:8px 0;font-size:16px}
+.btn{width:100%;padding:15px;border:none;border-radius:14px;font-weight:800;margin-top:8px;font-size:16px}
+.dep{background:#00ff88;color:#000}
+.wdr{background:#24304f;color:#fff}
+.buy{background:#00c853;width:48%;padding:14px;border:none;border-radius:12px;font-weight:800;color:#fff}
+.sell{background:#ff1744;width:48%;padding:14px;border:none;border-radius:12px;font-weight:800;color:#fff}
+.flex{display:flex;gap:8px;justify-content:space-between}
+.price{font-size:26px;text-align:center;padding:18px}
+</style>
+</head>
+<body>
+<h2>XTRADEX 💹</h2>
+<div class="card">
+<small>WALLET BALANCE</small>
+<div class="bal" id="bal">₦0.00</div>
+<input id="amt" type="number" placeholder="Enter amount e.g 5000">
+<button class="btn dep" onclick="deposit()">💳 DEPOSIT - PAYSTACK</button>
+<button class="btn wdr" onclick="withdraw()">🏦 WITHDRAW TO OPay</button>
+<small>Deposits go to Paystack, you transfer to your OPay</small>
+</div>
+<div class="card">
+<b>FOREX EUR/USD <span id="pr">1.0845</span></b>
+<div class="price" id="ch">📈 1.0845</div>
+<div class="flex"><button class="buy" onclick="trade('BUY')">BUY</button><button class="sell" onclick="trade('SELL')">SELL</button></div>
+<p id="msg" style="text-align:center;font-weight:bold"></p>
+</div>
+<div class="card"><b>Transactions</b><div id="hist">No transactions yet</div></div>
+<script>
+let bal=Number(localStorage.getItem('xtra_bal')||0);
+function render(){document.getElementById('bal').innerHTML='₦'+bal.toLocaleString();localStorage.setItem('xtra_bal',bal);}
+render();
+const PAYSTACK_KEY='pk_test_xxxxxxxxxxxxxxxxxx';
+function deposit(){
+let a=Number(document.getElementById('amt').value);
+if(!a||a<100)return alert('Enter min ₦100');
+if(PAYSTACK_KEY.includes('xx')){alert('IMPORTANT: Replace pk_test_xxx with your real Paystack Public Key! Go to dashboard.paystack.com -> Settings -> API Keys');return;}
+PaystackPop.setup({key:PAYSTACK_KEY,email:'trader@xtradex.com',amount:a*100,currency:'NGN',ref:'XTRA_'+Date.now(),callback:function(r){bal+=a;render();document.getElementById('hist').innerHTML='<div>✅ Deposit ₦'+a+' Ref:'+r.reference+'</div>'+document.getElementById('hist').innerHTML;alert('Success! ₦'+a+' added');},onClose:function(){}}).openIframe();
+}
+function withdraw(){
+let a=Number(document.getElementById('amt').value);
+if(!a||a>bal)return alert('Check balance & amount');
+let acct=prompt('Enter OPay account number:');if(!acct)return;
+let name=prompt('Account name:');if(!name)return;
+bal-=a;render();
+document.getElementById('hist').innerHTML='<div>🏦 Withdraw ₦'+a+' to OPay '+acct+' ('+name+') - PENDING</div>'+document.getElementById('hist').innerHTML;
+alert('Request saved! Go to Paystack Dashboard -> Transfers to send to OPay '+acct);
+}
+function trade(s){
+let a=Number(document.getElementById('amt').value)||1000;
+if(a>bal)return alert('Low balance');
+let win=Math.random()>0.45;let pnl=Math.round(a*0.07);
+if(win){bal+=pnl;msg.textContent='✅ '+s+' WIN +₦'+pnl;msg.style.color='#00ff88';}else{bal-=pnl;msg.textContent='❌ '+s+' LOSS -₦'+pnl;msg.style.color='#ff4444';}
+render();
+}
+setInterval(()=>{let p=(1.08+Math.random()*0.02).toFixed(4);document.getElementById('pr').textContent=p;document.getElementById('ch').textContent=(Math.random()>0.5?'📈 ':'📉 ')+p;},1600);
+</script>
+</body>
+</html>
