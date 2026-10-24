@@ -268,6 +268,49 @@ function payWithPaystack(){
   });
   handler.openIframe();
 }
+<!-- OFFLINE / ONLINE BAR -->
+<div id="offlineBar" style="display:none;position:fixed;top:0;left:0;right:0;background:#ff3b5c;color:#fff;text-align:center;padding:8px;font-size:11px;font-weight:700;z-index:10000">OFFLINE - No WiFi/Data - Connect to trade</div>
+<div id="onlineBar" style="display:none;position:fixed;top:0;left:0;right:0;background:#00cc66;color:#fff;text-align:center;padding:8px;font-size:11px;font-weight:700;z-index:10000">ONLINE - Live trading - Chart moving</div>
+body.offline .chartBox{opacity:0.5;pointer-events:none}
+body.offline .actions button{opacity:0.3;pointer-events:none}
+// OFFLINE HANDLING - If no data or WiFi, app offline
+function checkOnline(){
+ const offlineBar=document.getElementById('offlineBar');
+ const onlineBar=document.getElementById('onlineBar');
+ if(!navigator.onLine){
+   document.body.classList.add('offline');
+   offlineBar.style.display='block';
+   onlineBar.style.display='none';
+   document.getElementById('btcChange').innerText='OFFLINE - Trading paused - Turn on Data/WiFi';
+   document.getElementById('btcChange').style.color='#ff3b5c';
+   console.log('User OFFLINE - No data/WiFi - Trading stopped - You not earning');
+   // Stop price updates
+   if(window.priceInterval) clearInterval(window.priceInterval);
+ } else {
+   document.body.classList.remove('offline');
+   offlineBar.style.display='none';
+   onlineBar.style.display='block';
+   setTimeout(()=>{ onlineBar.style.display='none'; },3000);
+   document.getElementById('btcChange').style.color='#00cc88';
+   console.log('User ONLINE - Data/WiFi on - Chart moving - You earning from ads + data');
+   // Reload chart and price when back online
+   loadTV(currentSymbol,'60');
+   updatePrice();
+ }
+}
+
+window.addEventListener('online', checkOnline);
+window.addEventListener('offline', checkOnline);
+
+// Check on app open
+setTimeout(checkOnline, 1000);
+ self.addEventListener('install', e=>{
+ e.waitUntil(caches.open('xtradex-v1').then(cache=>cache.addAll(['/','/index.html'])));
+});
+self.addEventListener('fetch', e=>{
+ e.respondWith(caches.match(e.request).then(res=>res||fetch(e.request).catch(()=>caches.match('/index.html'))));
+});
+ if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js'); }
 </script>
 </body>
 </html>
