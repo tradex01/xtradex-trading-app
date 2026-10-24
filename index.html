@@ -7,31 +7,32 @@
 <script src="https://js.paystack.co/v1/inline.js"></script>
 </head>
 <body style="font-family:system-ui;padding:20px;background:#0f1115;color:#fff;max-width:480px;margin:auto">
-<h2>🚀 My Trading App</h2>
+<h2>My Trading App</h2>
 <div style="background:#1a1d26;padding:20px;border-radius:16px;margin-top:20px">
 <h3>Deposit to Trade</h3>
-<input id="email" type="email" placeholder="Your email" value="astriodkeys@gmail.com" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#0f1115;color:#fff;margin:8px 0">
-<input id="amount" type="number" placeholder="Amount NGN" value="1000" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#0f1115;color:#fff;margin:8px 0">
+<input id="email" type="email" value="astriodkeys@gmail.com" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#0f1115;color:#fff;margin:8px 0">
+<input id="amount" type="number" value="1000" style="width:100%;padding:12px;border-radius:8px;border:1px solid #333;background:#0f1115;color:#fff;margin:8px 0">
 <button onclick="payWithPaystack()" style="background:#00cc66;color:#fff;border:none;padding:14px;border-radius:10px;width:100%;font-size:16px;font-weight:600">Deposit Now</button>
 <div id="status" style="margin-top:15px"></div>
 </div>
 <script>
 const PAYSTACK_KEY = 'pk_live_8eef9c6a227339fbc3dc6af0d48be15e0e5960bc';
 function payWithPaystack(){
+  const statusEl = document.getElementById('status');
   const email = document.getElementById('email').value;
   const amount = document.getElementById('amount').value;
-  const statusEl = document.getElementById('status');
   if(!email || !amount){
-    statusEl.innerHTML = '❌ Enter email and amount';
+    statusEl.innerHTML = 'Enter email and amount';
     return;
   }
+  statusEl.innerHTML = 'Opening Paystack...';
   let handler = PaystackPop.setup({
     key: PAYSTACK_KEY,
     email: email,
     amount: amount * 100,
     currency: 'NGN',
     callback: function(response){
-      statusEl.innerHTML = '✅ Success! Ref: ' + response.reference + '<br>Payment received!';
+      statusEl.innerHTML = 'Success Ref: ' + response.reference;
     },
     onClose: function(){
       statusEl.innerHTML = 'Payment closed';
